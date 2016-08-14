@@ -1,0 +1,1144 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>CMR | Financial Report 2014-2015</title>
+
+    <!-- JavaScript
+    ================================================== -->
+	<script src="/js/d3.v3.min.js" charset="utf-8"></script>
+	<!--<script src="http://d3js.org/d3.v3.min.js" charset="utf-8"></script>-->
+
+    <!-- Basic Page Styles
+    ================================================== -->
+	<link href='http://fonts.googleapis.com/css?family=Montserrat:400,700|Roboto+Slab:400,700' rel='stylesheet' type='text/css'>
+
+	<style>
+        * { box-sizing: border-box; }
+        body { font-family: "Roboto Slab"; color: #333; }
+        .container { width: 1000px; margin: 3em auto; font-family: "Roboto Slab"; }
+        html { background: #dfdfdf; font-family: "Montserrat"; font-size: 1.05em; line-height: 1.25; }
+
+        .paper { width: 100%; background: #fff; border: 1px solid #cfcfcf; box-shadow: 0px 3px 4px 0px rgba(0,0,0,0.2); font-family: Montserrat; }
+        .card { padding: 1.5em 2.5em; margin: 3em auto; }
+        .sheet { padding: 5em; margin: 3em auto; }
+		.contentarea { width: 850px; margin: auto; padding: 0 50px; }
+
+        p { margin-bottom: 2em; }
+        small, .muted { color: #555; }
+        header { margin-bottom: 5em; }
+
+		.info { color: #a7a7a7; font-size: .8em; border-top: 1px solid #dfdfdf;}
+        .response { display: inline-block; line-height: 1.5; border-left: 3px solid #dfdfdf; padding: .5em 0 .5em 1.5em; }
+		.main-title { color: #444; font-size: 3.5em; text-align: center; margin: .5em auto; padding: 0; font-family: "Roboto Slab"; }
+		.sub-title { color: #555; font-size: 1.35em; line-height: 1.75; text-align: center; border-top: 1px solid #dfdfdf; padding-top: 1em; }
+		.section-title { color: #444; font-size: 3.5em; text-align: center; margin: 2em auto .5em auto; padding: 0; }
+
+		svg { margin: auto; display: block; }
+		svg:hover {outline: 1px solid #dfdfdf;}
+
+		.axis path { fill: none; stroke: #777777;}
+		.axis line { stroke: #777777; }
+		.axis text { fill: #555555; font-size: 12px; }
+
+		.btn {
+			font-family: Montserrat;
+			font-size: 12px;
+			padding: 5px 10px;
+			border-width: 3px;
+			border-style: solid;
+			cursor: pointer;
+
+		}
+		.btn-default {
+			background: #dfdfdf;
+			color: #777777;
+			border-color: #777777;
+			transition: all 100ms ease;
+		}
+		.btn-default:hover {
+			background: #777777;
+			color: #ffffff;
+		}
+    </style>
+
+
+	<script>
+		// Globals
+		// ==================================================
+		var mainData;
+
+		var subteamNames = ["Drive", "Task", "Electrical", "Software", "Science", "Business", "CMR", "Other"];
+
+		var subteamColors = {
+								Drive: "#F48F42",
+								Task: "#BCC747",
+								Electrical: "#7B63A3",
+								Software: "#68D8AB",
+								Science: "#F2C63E",
+								Business: "#5FC4E2",
+								CMR: "#C94442",
+								Other: "#dfdfdf" };
+
+		// Contains array of items categorized by subteam
+		var subteams = {
+						Drive: new Array,
+						Task: new Array,
+						Electrical: new Array,
+						Software: new Array,
+						Science: new Array,
+						Business: new Array,
+						CMR: new Array,
+						Other: new Array };
+
+		// Contains the expenses per subteam
+		var subteamCost;
+
+		// Team-wide total expenses
+		var teamCostSubtotal;
+		var teamCostTotal;
+
+
+		var vendorNames = new Array;
+
+		// Contains array of items categorized by vendors
+		var vendors = {};
+
+		// Contains vendors with their associated expense breakdown by subteams
+		var vendorCost = {};
+
+		// Array of Vendor Name and Total Cost arrays sorted in descending order by Total Cost
+		var vendorCostTotal = new Array;
+
+		// Toggle which subteam data to display in the vendor chart
+		var vendorSubteamToggle = "All";
+
+		// Toggle which subteam data to display inthe timeline graph
+		var timelineSubteamToggle = "All";
+
+		// Contains sorted array of items categorized by month
+		var months = {
+						0: new Array,
+						1: new Array,
+						2: new Array,
+						3: new Array,
+						4: new Array,
+						5: new Array,
+						6: new Array,
+						7: new Array,
+						8: new Array,
+						9: new Array,
+						10: new Array,
+						11: new Array,
+						NaN: new Array };
+
+		// Contains months with their associated expense breakdown by subteams
+		var monthCost = new Array;
+
+		var monthSubBreakdownData = {
+					Drive: new Array,
+					Task: new Array,
+					Electrical: new Array,
+					Software: new Array,
+					Science: new Array,
+					Business: new Array,
+					CMR: new Array,
+					Other: new Array };
+
+		var allOrders = new Array;
+		var groupOrders = new Array;
+
+		var displayNum = d3.format(",.2f");
+
+	</script>
+
+</head>
+<body>
+
+	<!-- Heading Card
+	================================================== -->
+	<div class="container">
+	<header class="paper card">
+		<h1 class="main-title">
+			<small>Cornell Mars Rover</small><br>
+			Financial Report 2014-2015
+		</h1>
+		<p class="sub-title">
+			For Internal Use Only
+		</p>
+	</header>
+	</div>
+
+
+	<!-- Overview
+	================================================== -->
+	<section class="container">
+		<h2 class="section-title">Overview</h2>
+
+		<div class="paper card">
+			<div id="subteam-chart" ></div>
+			<div class="info contentarea">
+				<p>
+					<p>Note</p>
+				</p>
+			</div>
+		</div>
+
+
+		<div class="paper card">
+			<div id="vendor-chart" ></div>
+			<div class="info contentarea">
+				<p>
+					<p>Note</p>
+				</p>
+			</div>
+		</div>
+	</section>
+
+
+	<!-- Timeline
+	================================================== -->
+	<section class="container">
+		<h2 class="section-title">Timeline</h2>
+
+		<div class="paper card">
+			<div id="subteam-timeline" ></div>
+			<div class="info contentarea">
+				<p>
+					<p>Note</p>
+				</p>
+			</div>
+		</div>
+
+<!--
+		<div class="paper card">
+			<div id="item-timeline" ></div>
+			<div class="info contentarea">
+				<p>
+					<p>Note</p>
+				</p>
+			</div>
+		</div>
+	</section>
+-->
+
+		<script>
+			// Sets up SVG Canvas within #subteam-chart element
+			// ==================================================
+			var subteamChartWidth = 850;
+			var subteamChartHeight = 575;
+			var subteamChartPadding = 50;
+
+			var svgSubteam = d3.select("#subteam-chart").append("svg")
+							.attr("width", subteamChartWidth)
+							.attr("height", subteamChartHeight);
+
+			// Sets up SVG Canvas within #vendor-chart element
+			// ==================================================
+			var vendorChartWidth = 850;
+			var vendorChartHeight = 1425;
+			var vendorChartPadding = 50;
+
+			var svgVendor = d3.select("#vendor-chart").append("svg")
+							.attr("width", vendorChartWidth)
+							.attr("height", vendorChartHeight);
+
+			// Sets up SVG Canvas within #subteam-timeline element
+			// ==================================================
+			var subteamTimelineWidth = 850;
+			var subteamTimelineHeight = 525;
+			var subteamTimelinePadding = 50;
+
+			var svgSubTime = d3.select("#subteam-timeline").append("svg")
+							.attr("width", subteamTimelineWidth)
+							.attr("height", subteamTimelineHeight);
+
+
+			// Start Playing with the Data!
+			// ==================================================
+			d3.tsv("financialdata.tsv", function(data){
+				mainData = data;
+
+				// Categorize the Data
+				// ==================================================
+
+				// Categorize by Subteams
+				mainData.forEach(function(item, i){
+
+					// Make Cost and Order Cost object properties numbers
+					item.Cost = +(item.Cost.replace(/,/g, ""));
+					item["Order Cost"] = +(item["Order Cost"].replace(/,/g, ""));
+
+
+					switch(item.Subteam) {
+						case "Drive":
+							subteams.Drive.push(item);
+							break;
+
+						case "Task":
+							subteams.Task.push(item);
+							break;
+
+						case "Electrical":
+							subteams.Electrical.push(item);
+							break;
+
+						case "Software":
+							subteams.Software.push(item);
+							break;
+
+						case "Science":
+							subteams.Science.push(item);
+							break;
+
+						case "Business":
+							subteams.Business.push(item);
+							break;
+
+						case "Team":
+						case "CMR":
+						case "CMR Team":
+							subteams.CMR.push(item);
+							break;
+
+						default:
+							subteams.Other.push(item);
+							item.Subteam = "Other";
+							break;
+					}
+
+					// Categorize by Months
+					var monthID = (new Date(item.Date).getMonth());
+					months[monthID].push(item);
+
+					// Within each month, sort items by date
+					for (var i = 0; i < 12; i++) {
+						months[i].sort(function(a,b){
+							// Get a value that is either negative, positive, or zero.
+							return new Date(b.date) - new Date(a.date);
+						});
+					}
+
+					// Categorize by Vendors
+					var vendName = item.Vendor;
+					if (vendorNames.indexOf(vendName) == -1) {
+						vendorNames.push(vendName);
+						vendors[vendName] = new Array;
+					}
+					vendors[vendName].push(item);
+
+
+					if (allOrders.indexOf(item["Order ID"]) === -1) {
+						allOrders.push(item["Order ID"]);
+					}
+					else {
+						if (groupOrders.indexOf(item["Order ID"]) === -1) {
+							groupOrders.push(item["Order ID"]);
+						}
+					}
+
+				}); // END for each item in mainData
+
+
+				// Prepare Subteam Chart Data
+				// ==================================================
+				subteamCost = { Drive: 0,
+									Task: 0,
+									Electrical: 0,
+									Software: 0,
+									Science: 0,
+									Business: 0,
+									CMR: 0,
+									Other: 0 };
+
+				teamCostSubtotal = 0;
+				teamCostTotal = 0;
+
+				// For each subteam, calculate the total costs of its items
+				// Also add up the total cost of all items in the dataset
+				subteamNames.forEach(function(name){
+					subteams[name].forEach(function(item){
+						if (! isNaN( +(item.Cost) )) {
+							subteamCost[name] += +(item.Cost);
+							teamCostSubtotal += +(item.Cost);
+						}
+					});
+				});
+
+				// Add up the total cost of all the orders
+				mainData.forEach(function(item){
+					if (! isNaN( +(item["Order Cost"]) )) {
+						teamCostTotal += +(item["Order Cost"]);
+					}
+				});
+
+
+				// Generate Subteam Chart
+				// ==================================================
+				// Subteam Chart Title
+				svgSubteam.append("text")
+					.text("Expense Breakdown By Subteam")
+					.attr("x", subteamChartPadding)
+					.attr("y", subteamChartPadding)
+					.attr("dominant-baseline", "hanging")
+					.attr("font-size", 24)
+					.attr("fill", "#555555");
+
+				// Generate the Stacked Bar Chart
+				var subteamBarWidthsTotal = subteamChartWidth - (2 * subteamChartPadding);
+				var subteamBarWidths = {};
+				var subteamBarOffsets = {};
+
+				subteamNames.forEach(function(name, i){
+					subteamBarWidths[name] = (subteamCost[name] / teamCostSubtotal) * subteamBarWidthsTotal
+					if (i == 0) {
+						subteamBarOffsets[name] = 0;
+					}
+					else {
+						subteamBarOffsets[name] = subteamBarOffsets[subteamNames[i-1]] + subteamBarWidths[subteamNames[i-1]];
+					}
+
+
+					svgSubteam.append("rect")
+						.attr("class", "bar-" + name)
+						.attr("x", subteamChartPadding + subteamBarOffsets[name])
+						.attr("y", subteamChartPadding + 50)
+						.attr("width", subteamBarWidths[name])
+						.attr("height", 100)
+						.attr("fill", subteamColors[name])
+						.on("mouseover", function() { mouseoverSubteam(name) })
+						.on("mouseout", function() { mouseoutSubteam(name) });
+
+
+					// Generate the Legend
+					if (name != "Other") {
+						var currentCostLegendUnit = svgSubteam.append("g")
+							.attr("class", "costlegend-" + name);
+
+						currentCostLegendUnit
+							.on("mouseover", function() { mouseoverSubteam(name) })
+							.on("mouseout", function() {mouseoutSubteam(name) });
+
+						currentCostLegendUnit.append("rect")
+							.attr("x", subteamChartPadding - 10)
+							.attr("y", 250 + 40 * i)
+							.attr("width", 295)
+							.attr("height", 35)
+							.attr("fill", "#fff");
+
+						currentCostLegendUnit.append("rect")
+							.attr("class", "border-" + name)
+							.attr("x", subteamChartPadding - 10)
+							.attr("y", 250 + 40 * i)
+							.attr("width", 0)
+							.attr("height", 35)
+							.attr("fill", "#fff")
+							.attr("stroke-width", 2.5)
+							.attr("stroke", subteamColors[name]);
+
+						currentCostLegendUnit.append("text")
+							.text(name)
+							.attr("x", subteamChartPadding)
+							.attr("y", 275 + 40 * i)
+							.attr("font-size", 18)
+							.attr("fill", subteamColors[name]);
+
+						currentCostLegendUnit.append("text")
+							.text("$")
+							.attr("x", 225)
+							.attr("y", 275 + 40 * i)
+							.attr("font-size", 18)
+							.attr("fill", subteamColors[name]);
+
+						currentCostLegendUnit.append("text")
+							.text(displayNum(subteamCost[name]))
+							.attr("x", 325)
+							.attr("y", 275 + 40 * i)
+							.attr("text-anchor", "end")
+							.attr("font-size", 18)
+							.attr("fill", subteamColors[name]);
+					}
+
+				}); // END for each
+
+				svgSubteam.append("text")
+					.text("# of Single Orders")
+					.attr("x", subteamChartWidth - subteamChartPadding - 300)
+					.attr("y", 275)
+					.attr("font-size", 18)
+					.attr("fill", "#777");
+
+				svgSubteam.append("text")
+					.text(allOrders.length - groupOrders.length)
+					.attr("x", subteamChartWidth - subteamChartPadding)
+					.attr("y", 275)
+					.attr("text-anchor", "end")
+					.attr("font-size", 18)
+					.attr("fill", "#777");
+
+				svgSubteam.append("text")
+					.text("# of Group Orders")
+					.attr("x", subteamChartWidth - subteamChartPadding - 300)
+					.attr("y", 275 + 40)
+					.attr("font-size", 18)
+					.attr("fill", "#777");
+
+				svgSubteam.append("text")
+					.text(groupOrders.length)
+					.attr("x", subteamChartWidth - subteamChartPadding)
+					.attr("y", 275 + 40)
+					.attr("text-anchor", "end")
+					.attr("font-size", 18)
+					.attr("fill", "#777");
+
+				svgSubteam.append("text")
+					.text("Cost of Items")
+					.attr("x", subteamChartWidth - subteamChartPadding - 300)
+					.attr("y", 275 + 40 * 3)
+					.attr("font-size", 18)
+					.attr("fill", "#555");
+
+				svgSubteam.append("text")
+					.text("$" + displayNum(teamCostSubtotal))
+					.attr("x", subteamChartWidth - subteamChartPadding)
+					.attr("y", 275 + 40 * 3)
+					.attr("text-anchor", "end")
+					.attr("font-size", 18)
+					.attr("fill", "#555");
+
+				svgSubteam.append("text")
+					.text("Additional Expenses")
+					.attr("x", subteamChartWidth - subteamChartPadding - 300)
+					.attr("y", 275 + 40 * 4)
+					.attr("font-size", 18)
+					.attr("fill", "#555");
+
+				svgSubteam.append("text")
+					.text("$" + displayNum(teamCostTotal - teamCostSubtotal))
+					.attr("x", subteamChartWidth - subteamChartPadding)
+					.attr("y", 275 + 40 * 4)
+					.attr("text-anchor", "end")
+					.attr("font-size", 18)
+					.attr("fill", "#555");
+
+				svgSubteam.append("line")
+					.attr("x1", subteamChartWidth - subteamChartPadding - 300)
+					.attr("x2", subteamChartWidth - subteamChartPadding)
+					.attr("y1", 275 + 40 * 5 - 25)
+					.attr("y2", 275 + 40 * 5 - 25)
+					.attr("stroke-width", 2.5)
+					.attr("stroke", "IndianRed");
+
+				svgSubteam.append("text")
+					.text("Total Expenses")
+					.attr("x", subteamChartWidth - subteamChartPadding - 300)
+					.attr("y", 275 + 40 * 5 + 10)
+					.attr("font-size", 21)
+					.attr("fill", "IndianRed");
+
+				svgSubteam.append("text")
+					.text("$" + displayNum(teamCostTotal))
+					.attr("x", subteamChartWidth - subteamChartPadding)
+					.attr("y", 275 + 40 * 5 + 10)
+					.attr("text-anchor", "end")
+					.attr("font-size", 21)
+					.attr("fill", "IndianRed");
+
+				// Subteam Chart Interactions
+				// ==================================================
+				function mouseoverSubteam(name){
+					svgSubteam.selectAll(".border-" + name)
+						.transition()
+						.attr("width", 295);
+					svgSubteam.selectAll(".bar-" + name)
+						.transition()
+						.attr("height", 115)
+				}
+
+				function mouseoutSubteam(name) {
+					svgSubteam.selectAll(".border-" + name)
+						.transition()
+						.attr("width", 0);
+					svgSubteam.selectAll(".bar-" + name)
+						.transition()
+						.attr("height", 100)
+				}
+
+
+
+
+				// Prepare Vendor Chart Data
+				// ==================================================
+
+				// For each vendor, calculate the expense breakdown per subteams
+				vendorNames.forEach(function(vendName){
+					vendorCost[vendName] = {
+									Drive: 0,
+									Task: 0,
+									Electrical: 0,
+									Software: 0,
+									Science: 0,
+									Business: 0,
+									CMR: 0,
+									Other: 0 };
+
+					var currentVendorTotalCost = 0;
+					// For each item purchased from this vendor, tally its cost to
+					// the appropriate subteam
+					vendors[vendName].forEach(function(item){
+						vendorCost[vendName][item.Subteam] += item.Cost;
+						currentVendorTotalCost += item.Cost;
+					});
+
+					vendorCostTotal.push([vendName, currentVendorTotalCost]);
+
+				}); // END for each vendor
+
+				vendorCostTotal.sort(function(a,b){
+					return b[1] - a[1];
+				});
+
+
+				// Generate Vendor Chart Data
+				// ==================================================
+
+				// Vendor Chart Title
+				svgVendor.append("text")
+					.text("Expense Breakdown By Vendor")
+					.attr("x", vendorChartPadding)
+					.attr("y", vendorChartPadding)
+					.attr("dominant-baseline", "hanging")
+					.attr("font-size", 24)
+					.attr("fill", "#555555");
+
+
+				subteamNames.forEach(function(name, i){
+					var vendorChartToggle;
+
+					if (i == 0) {
+						 vendorChartToggle = svgVendor.append("g")
+							.attr("class", "vendorChartToggle vendorChartToggle-" + "All")
+							.on("mouseover", function(){ mouseoverVendorChartToggle("All"); })
+							.on("mouseout", function(){ mouseoutVendorChartToggle("All"); })
+							.on("click", function(){ vendorChartToggleUpdate("All"); });
+
+						vendorChartToggle.append("rect")
+							.attr("x", vendorChartPadding + 95 * i)
+							.attr("y", 100)
+							.attr("width", 80)
+							.attr("height", 25)
+							.attr("fill", "#ffffff")
+							.attr("fill-opacity", 0.25)
+							.attr("stroke-width", 2.5)
+							.attr("stroke", "SteelBlue")
+							.attr("stroke-opacity", 0.5);
+
+						vendorChartToggle.append("text")
+							.text("All")
+							.attr("x", vendorChartPadding + 40  + 95 * i)
+							.attr("y", 112.5)
+							.attr("dominant-baseline", "central")
+							.attr("text-anchor", "middle")
+							.attr("font-size", 12)
+							.attr("fill", "SteelBlue");
+					}
+
+					if (name != "Other" ) {
+						var vendorChartToggle = svgVendor.append("g")
+							.attr("class", "vendorChartToggle vendorChartToggle-" + name)
+							.on("mouseover", function(){ mouseoverVendorChartToggle(name); })
+							.on("mouseout", function(){ mouseoutVendorChartToggle(name); })
+							.on("click", function(){ vendorChartToggleUpdate(name); });
+
+						vendorChartToggle.append("rect")
+							.attr("x", vendorChartPadding + 95 * (i + 1))
+							.attr("y", 100)
+							.attr("width", 80)
+							.attr("height", 25)
+							.attr("fill", "#ffffff")
+							.attr("fill-opacity", 0.25)
+							.attr("stroke-width", 2.5)
+							.attr("stroke", subteamColors[name])
+							.attr("stroke-opacity", 0.5);
+
+						vendorChartToggle.append("text")
+							.text(name)
+							.attr("x", vendorChartPadding + 40  + 95 * (i + 1))
+							.attr("y", 112.5)
+							.attr("dominant-baseline", "central")
+							.attr("text-anchor", "middle")
+							.attr("font-size", 12)
+							.attr("fill", subteamColors[name]);
+					}
+
+				});
+
+
+				svgVendor.append("text")
+					.attr("class", "vendorChartInfo")
+					.text("Select a Subteam Breakdown")
+					.attr("x", vendorChartPadding)
+					.attr("y", 175)
+					.attr("font-size", 18)
+					.attr("fill", "#777");
+
+				var maxVendorBarWidth = 400;
+
+				// Generate Bars and Labels Structure
+				vendorCostTotal.forEach(function(vendor, i){
+					if (i < 10) {
+						svgVendor.append("text")
+							.text(vendor[0])
+							.attr("x", 250)
+							.attr("y", vendorChartPadding + 200 + 40 * i)
+							.attr("text-anchor", "end")
+							.attr("font-size", 18)
+							.attr("fill", "#555");
+
+						svgVendor.append("rect")
+							.attr("class", "vendorChartBarBG")
+							.attr("x", 300)
+							.attr("y", vendorChartPadding + 185 + 40 * i)
+							.attr("width", maxVendorBarWidth)
+							.attr("height", 20)
+							.attr("fill", "#efefef");
+
+						svgVendor.append("rect")
+							.attr("class", "vendorChartBar")
+							.data(vendor[0])
+							.attr("x", 300)
+							.attr("y", vendorChartPadding + 185 + 40 * i)
+							.attr("width", 3)
+							.attr("height", 20)
+							.attr("fill", "#777777");
+
+						svgVendor.append("text")
+							.attr("class", "vendorChartCost")
+							.text("$" + 0)
+							.attr("x", vendorChartWidth - vendorChartPadding)
+							.attr("y", vendorChartPadding + 200 + 40 * i)
+							.attr("text-anchor", "end")
+							.attr("font-size", 18)
+							.attr("fill", "#555");
+					}
+					else {
+						if (i == 10) {
+							svgVendor.selectAll("text")
+								.data(["More"])
+								.enter()
+								.append("text")
+								.text(function(d){ console.log("show more"); return "Show " + d; })
+								.attr("x", vendorChartWidth / 2)
+								.attr("y", (vendorChartPadding + 200 + 40 * 10) + (30 * (i - 10)))
+								.attr("text-anchor", "midddle")
+								.attr("font-size", 14)
+								.attr("fill", "#a7a7a7");
+						}
+						svgVendor.append("text")
+							.text(vendor[0])
+							.attr("x", 250)
+							.attr("y", (vendorChartPadding + 200 + 40 * 10) + (30 * (i - 10)))
+							.attr("text-anchor", "end")
+							.attr("font-size", 14)
+							.attr("fill", "#777");
+
+						svgVendor.append("rect")
+							.attr("class", "vendorChartBarBG")
+							.attr("x", 300)
+							.attr("y", (vendorChartPadding + 200 + 40 * 10) + (30 * (i - 10)) - 10)
+							.attr("width", maxVendorBarWidth)
+							.attr("height", 10)
+							.attr("fill", "#efefef")
+							.attr("opacity", 0.5);
+
+						svgVendor.append("rect")
+							.attr("class", "vendorChartBar")
+							.attr("x", 300)
+							.attr("y", (vendorChartPadding + 200 + 40 * 10) + (30 * (i - 10)) - 10)
+							.attr("width", 3)
+							.attr("height", 10)
+							.attr("fill", "#a7a7a7")
+							.attr("opacity", 0.75);
+
+						svgVendor.append("text")
+							.attr("class", "vendorChartCost")
+							.text("$" + 0)
+							.attr("x", vendorChartWidth - vendorChartPadding)
+							.attr("y", (vendorChartPadding + 200 + 40 * 10) + (30 * (i - 10)))
+							.attr("text-anchor", "end")
+							.attr("font-size", 14)
+							.attr("fill", "#777");
+					}
+				}); // END for each vendorCostTotal
+
+				// Initialize the default "All" data for the Vendor Chart
+				vendorChartToggleUpdate("All");
+
+
+				// Vendor Chart Interactions
+				// ==================================================
+
+				function mouseoverVendorChartToggle(name) {
+					var currentToggle = svgVendor.select(".vendorChartToggle-" + name);
+
+					if (vendorSubteamToggle != name) {
+						if (name == "All") {
+							currentToggle.select("rect")
+								.transition().duration(100)
+								.attr("fill", "SteelBlue")
+								.attr("fill-opacity", 0.25)
+								.attr("stroke-opacity", 1);
+							currentToggle.select("text")
+								.transition()
+								.attr("fill", "SteelBlue");
+						}
+						else {
+							currentToggle.select("rect")
+								.transition().duration(100)
+								.attr("fill", subteamColors[name])
+								.attr("fill-opacity", 0.25)
+								.attr("stroke-opacity", 1);
+							currentToggle.select("text")
+								.transition()
+								.attr("fill", subteamColors[name]);
+						}
+					}
+					currentToggle.style("cursor", "pointer");
+				}
+
+				function mouseoutVendorChartToggle(name, reset) {
+					var currentToggle = svgVendor.select(".vendorChartToggle-" + name);
+
+					if (vendorSubteamToggle != name) {
+
+						if (name == "All") {
+							currentToggle.select("rect")
+								.transition()
+								.attr("fill", "#fff")
+								.attr("fill-opacity", 0.25)
+								.attr("stroke-opacity", 0.5);
+							currentToggle.select("text")
+								.transition()
+								.attr("fill", "SteelBlue");
+						}
+						else {
+							currentToggle.select("rect")
+								.transition()
+								.attr("fill", "#fff")
+								.attr("fill-opacity", 0.25)
+								.attr("stroke-opacity", 0.5);
+							currentToggle.select("text")
+								.transition()
+								.attr("fill", subteamColors[name]);
+						}
+					}
+					else {
+						clickVendorChartToggle(name);
+					}
+					currentToggle.style("cursor", "auto");
+				}
+
+				function clickVendorChartToggle(name) {
+					var currentToggle = svgVendor.select(".vendorChartToggle-" + name);
+					if (name == "All") {
+						currentToggle.select("rect")
+							.transition().duration(100)
+							.attr("fill", "SteelBlue")
+							.attr("fill-opacity", 0.85)
+							.attr("stroke-opacity", 1);
+					}
+					else {
+						currentToggle.select("rect")
+							.transition().duration(100)
+							.attr("fill", subteamColors[name])
+							.attr("fill-opacity", 0.85)
+							.attr("stroke-opacity", 1);
+					}
+
+					currentToggle.select("text")
+						.transition().duration(100)
+						.attr("fill", "#fff");
+
+					currentToggle.style("cursor", "pointer");
+
+				}
+
+				function vendorChartToggleUpdate(subteamName) {
+					var prevSubteamToggle = vendorSubteamToggle;
+					var currentToggle = svgVendor.select(".vendorChartToggle-" + subteamName);
+					// Set the new global toggle value to the clicked one
+					vendorSubteamToggle = subteamName
+					// Reset the previous toggle
+					mouseoutVendorChartToggle(prevSubteamToggle);
+					// Now, apply the toggled style to the current toggle
+					clickVendorChartToggle(subteamName);
+
+					var dataChartInfo;
+					var dataWidthAll = new Array;
+					var dataWidthSubteam = new Array;
+					var dataCost = new Array;
+
+					// Chart Info Text
+					if (subteamName == "All") {
+						dataChartInfo = "The " + "Entire Team" + " spent a total of $"
+							+ displayNum(teamCostTotal)
+							+ " in expenses across these vendors.";
+					}
+					else if (subteamName == "CMR") {
+						dataChartInfo = "Expenses not specefic to any subteam totaled $"
+							+ displayNum(subteamCost[subteamName])
+							+ " across these vendors.";
+					}
+					else {
+						dataChartInfo = "The " + subteamName + " Subteam spent a total of $"
+							+ displayNum(subteamCost[subteamName])
+							+ " in expenses across these vendors.";
+					}
+					svgVendor.select(".vendorChartInfo")
+						.html(dataChartInfo);
+
+					vendorCostTotal.forEach(function(vendor, i){
+						var vendName = vendor[0];
+						var vendTotal = vendor[1];
+						var maxVendTotal = vendorCostTotal[0][1];
+
+						dataWidthAll.push(vendTotal / maxVendTotal * maxVendorBarWidth);
+						dataWidthSubteam.push(vendorCost[vendName][subteamName] / maxVendTotal * maxVendorBarWidth);
+
+						if (subteamName == "All") {
+							dataCost.push(vendTotal);
+						}
+						else {
+							dataCost.push(vendorCost[vendName][subteamName]);
+						}
+					});
+
+					if (subteamName == "All") {
+						svgVendor.selectAll(".vendorChartBarBG")
+							.transition(100)
+							.attr("width", maxVendorBarWidth);
+
+						svgVendor.selectAll(".vendorChartBar")
+							.data(dataWidthAll)
+							.transition()
+							.attr("width", function(d){ return d; })
+							.attr("fill", "SteelBlue");
+
+						svgVendor.selectAll(".vendorChartCost")
+							.data(dataCost)
+							.transition()
+							.text(function(d){ return "$" + displayNum(d); })
+							.attr("fill", "SteelBlue");
+					}
+					else {
+						svgVendor.selectAll(".vendorChartBarBG")
+							.data(dataWidthAll)
+							.transition(500)
+							.attr("width", function(d){ return d; });
+
+						svgVendor.selectAll(".vendorChartBar")
+							.data(dataWidthSubteam)
+							.transition()
+							.delay(function(){ return (prevSubteamToggle == "All")? 325 : 0; })
+							.attr("width", function(d){ return d; })
+							.attr("fill", subteamColors[subteamName]);
+
+						svgVendor.selectAll(".vendorChartCost")
+							.data(dataCost)
+							.transition()
+							.text(function(d){ return "$" + displayNum(d); })
+							.attr("fill", subteamColors[subteamName]);
+					}
+				}
+
+
+
+				// Prepare Subteam Timeline Data
+				// ==================================================
+
+				// for each month, calculate the cost breakdown per subteam
+				for (var i = 0; i < 12; i++) {
+					monthCost[i] = {
+									Drive: 0,
+									Task: 0,
+									Electrical: 0,
+									Software: 0,
+									Science: 0,
+									Business: 0,
+									CMR: 0,
+									Other: 0 };
+
+					months[i].forEach(function(item){
+						monthCost[i][item.Subteam] += item.Cost;
+					});
+				};
+
+				var maxDomainST = 0;
+
+				monthCost.forEach(function(currentMonthCost, i){
+					subteamNames.forEach(function(subteamName){
+						if (maxDomainST < currentMonthCost[subteamName] ) {
+							maxDomainST = currentMonthCost[subteamName];
+						}
+
+						if (subteamName != "Other") {
+							var subDate = ( (i >= 0 && i < 9)? new Date(2015, i, 1) : new Date(2014, i, 1) );
+							var subCost = monthCost[i][subteamName];
+							monthSubBreakdownData[subteamName].push({ x: subDate, y: subCost });
+						}
+
+					});
+				});
+
+				// For each subteam, sort monthly breakdown by date
+				subteamNames.forEach(function(subteamName){
+					monthSubBreakdownData[subteamName].sort(function(a,b){
+						return b.x - a.x
+					});
+				});
+
+
+				var xScaleST = d3.time.scale()
+					.domain([new Date(2014, 8, 1), new Date(2015, 7, 1)])
+					.range([subteamTimelinePadding * 2, subteamTimelineWidth - subteamTimelinePadding * 2])
+
+				var yScaleST = d3.scale.linear()
+					.domain([0, maxDomainST])
+					.range([subteamTimelinePadding + 300, subteamTimelinePadding]);
+
+
+
+				// Generate Subteam Timeline
+				// ==================================================
+				// Subteam Timeline Title
+				svgSubTime.append("text")
+					.text("Expenses By Subteams Over Time")
+					.attr("x", subteamTimelinePadding)
+					.attr("y", subteamTimelinePadding)
+					.attr("dominant-baseline", "hanging")
+					.attr("font-size", 24)
+					.attr("fill", "#555555");
+
+				var xAxisST = d3.svg.axis().scale(xScaleST).orient("bottom")
+						.ticks(d3.time.months)
+						.tickFormat(d3.time.format("%b"))
+						.tickPadding(10);
+				var yAxisST = d3.svg.axis().scale(yScaleST).orient("left");
+
+				var svgSubTimeGraph = svgSubTime.append("g")
+					.attr("transform", "translate(0," + (subteamTimelinePadding * 1.5) + ")");
+
+				var lineFunction = function(d, subteamName){
+						return d3.svg.line()
+							.x(function(d, i) { console.log( xScaleST( (i >= 0 && i < 9)? new Date(2015, i, 1) : new Date(2014, i, 1) )); })
+							.y(function(d) { console.log( yScaleST( d[subteamName] )); });
+					}
+
+
+				svgSubTimeGraph.append("g")
+					.attr("class", "axis")
+					.attr("transform", "translate(0," + (subteamTimelinePadding + 300) + ")")
+					.call(xAxisST);
+				svgSubTimeGraph.append("g")
+					.attr("class", "axis")
+					.attr("transform", "translate(" + (subteamTimelinePadding * 2) + ", 0)")
+					.call(yAxisST);
+
+
+
+				// Draw the lines!
+				var drawTimelineData = d3.svg.line()
+					.x(function(d) { return xScaleST(d.x); })
+					.y(function(d) { return yScaleST(d.y); })
+					.interpolate("linear");
+
+				subteamNames.forEach(function(subteamName){
+					svgSubTimeGraph.append("path")
+						.attr("class", "timeline-line timeline-line-" + subteamName)
+						.attr("d", drawTimelineData(monthSubBreakdownData[subteamName]))
+						.attr("fill", "none")
+						.attr("stroke", subteamColors[subteamName])
+						.attr("stroke-width", 2)
+						.style("opacity", 0.35)
+						.style("z-index", 0)
+						.on("click", function(){ clickTimeline(subteamName); })
+
+					svgSubTimeGraph.selectAll(".timeline-point-" + subteamName)
+						.data(monthSubBreakdownData[subteamName])
+						.enter()
+						.append("circle")
+						.attr("class", "timeline-point timeline-point-" + subteamName)
+						.attr("r", 3)
+						.attr("cx", function(d){ return xScaleST(d.x); })
+						.attr("cy", function(d){ return yScaleST(d.y); })
+						.attr("fill", subteamColors[subteamName])
+						.style("opacity", 0.35)
+						.on("click", function(){ clickTimeline(subteamName); })
+				});
+
+
+				// Subteam Timeline Interactions
+				// ==================================================
+				function clickTimeline(subteamName) {
+					if (timelineSubteamToggle == subteamName) {
+						clickTimelineReset();
+						timelineSubteamToggle = "All";
+					}
+					else {
+						svgSubTimeGraph.selectAll(".timeline-line").style("opacity", 0.15);
+						svgSubTimeGraph.selectAll(".timeline-point").style("opacity", 0.15);
+						svgSubTimeGraph.selectAll(".timeline-label").remove();
+						svgSubTimeGraph.selectAll(".timeline-line-" + subteamName).style("opacity", 1);
+						svgSubTimeGraph.selectAll(".timeline-point-" + subteamName).style("opacity", 1);
+
+						svgSubTimeGraph.append("text")
+							.text(subteamName)
+							.attr("class", "timeline-label timeline-label-" + subteamName)
+							.attr("x", xScaleST(new Date(2014, 8, 1)) + 12)
+							.attr("y", yScaleST(maxDomainST) - 4)
+							.attr("font-size", 16)
+							.attr("fill", subteamColors[subteamName])
+							.on("click", function(){ clickTimeline(subteamName); }); 
+
+						svgSubTimeGraph.selectAll(".timeline-label .timeline-label-" + subteamName)
+							.data(monthSubBreakdownData[subteamName])
+							.enter()
+							.append("text")
+							.text(function(d){ return  "$" + displayNum(d.y) })
+							.attr("class", "timeline-label")
+							.attr("x", function(d){ return xScaleST(d.x) - 4; })
+							.attr("y", function(d){ return yScaleST(d.y) - 6; })
+							.attr("font-size", 12)
+							.attr("fill", "#555555");
+
+						timelineSubteamToggle = subteamName;
+					}
+				}
+				function clickTimelineReset() {
+					svgSubTimeGraph.selectAll(".timeline-line").style("opacity", 0.35);
+					svgSubTimeGraph.selectAll(".timeline-point").style("opacity", 0.35);
+					svgSubTimeGraph.selectAll(".timeline-label").remove();
+				}
+				function mouseoverTimelinePoint(subteamName) {
+					return;
+				}
+				function mouseoutTimelinePoint(subteamName) {
+					return;
+				}
+
+			}); // END "financialdata.tsv"
+		</script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+</body>
+</html>

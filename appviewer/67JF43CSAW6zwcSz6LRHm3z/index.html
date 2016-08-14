@@ -1,0 +1,371 @@
+<!DOCTYPE html>
+<!--[if lt IE 7 ]><html class="ie ie6" lang="en"> <![endif]-->
+<!--[if IE 7 ]><html class="ie ie7" lang="en"> <![endif]-->
+<!--[if IE 8 ]><html class="ie ie8" lang="en"> <![endif]-->
+<!--[if (gte IE 9)|!(IE)]><!--><html lang="en"> <!--<![endif]-->
+<head>
+
+	<!-- Basic Page Needs
+	================================================== -->
+	<meta charset="utf-8">
+	<title>Applications 2015 | CMR</title>
+
+	<!-- CSS
+	================================================== -->
+	<link href='https://fonts.googleapis.com/css?family=Roboto:400,500,700|Quantico:400,700' rel='stylesheet' type='text/css'>
+	<link href='https://cdnjs.cloudflare.com/ajax/libs/normalize/3.0.3/normalize.min.css' rel='stylesheet' type='text/css'>
+
+	<style>
+		body {
+			font-family: "Roboto";
+			color: #333333;
+			background: #dfdfdf;
+			margin: 100px 25px;
+		}
+		
+		h1, h2, h3, h4, h5, h6 {
+			font-family: "Quantico";
+			color: #C2553C;
+			font-weight: normal;
+
+		}
+
+		h1 {
+			font-size: 4.5em;
+			line-height: 1;
+			text-align: center;
+		}
+
+		h1 small {
+			font-size: 0.5em;
+		}
+
+		h2 {
+			font-size: 2.5em;
+			font-weight: bold;
+			margin: 0;
+		}
+
+		h3 {
+			font-size: 1.25em;
+			margin: 0;
+		}
+
+		h4 {
+			font-size: 1em;
+			font-family: Roboto;
+			font-weight: 500;
+			margin: 50px 0 10px 0;
+		}
+
+		h4 big {
+			font-size: 1.25em;
+			font-weight: bold;
+		}
+
+		a, a:hover, a:visited, a:focus { color: #B22222;}
+
+		p {
+			font-size: 1.15em;
+			line-height: 1.5;
+		}
+
+		hr {
+			height: 1px;
+			border: 0;
+			background: #dfdfdf;
+			margin: 50px auto;
+		}
+
+		nav {
+			text-align: center;
+		}
+
+		.btn {
+			font-family: Quantico;
+			padding: 3px 25px;
+			background: transparent;
+			border: 3px solid transparent;
+			cursor: pointer;
+		}
+
+		.btn:hover {
+			background: rgba(194,85,60,0.1);
+		}
+
+		.btn-default {
+			color: #C2553C;
+			background: rgba(194,85,60,0);
+			border: 3px solid #C2553C;
+		}
+
+		.btn-selected,
+		.btn-selected:hover {
+			color: #ffffff;
+			background: rgba(194,85,60,1);
+			border: 3px solid #C2553C;
+		}
+
+		.btn input { display: none; }
+
+		.page {
+			background: #ffffff;
+			width: 750px;
+			max-width: 95%;
+			padding: 100px;
+			margin: 100px auto;
+			position: relative;
+		}
+
+		.muted {
+			color: #777777;
+		}
+
+		.primary {
+			color: #C2553C;
+		}
+
+		.counter {
+			font-family: Quantico;
+			color: #ffffff;
+			background: #bfbfbf;
+			padding: 5px 100px 5px 25px;
+			position: absolute;
+			top: 25px;
+			right: 0px;
+		}
+		.tag {
+			font-weight: bold;
+			width: 125px;
+			display: inline-block;
+		}
+
+	</style>
+
+	<!-- Favicons
+	================================================== -->
+
+
+	<!-- Analytics
+	================================================== -->
+
+	<!-- Mobile Specific Metas
+	================================================== -->
+	<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+
+
+	<!-- Page Specific Styles and Scripts
+	================================================== -->
+	<script src="/js/d3.v3.min.js"></script>
+
+</head>
+<body>
+
+<!-- Primary Page Layout
+================================================== -->
+
+<h1><strong id="subteamTitle">Business</strong><br><small>CMR Applications 2015</small></h1>
+
+
+<nav>
+	<label onclick="selectSubteamPref()" class="btn btn-selected"><input type="radio" name="subteamPref" value="first" class="chkSubteamPref" checked/> 1st Pref</label>
+	<label onclick="selectSubteamPref()" class="btn btn-default" class="btn btn-default"><input type="radio" name="subteamPref" class="chkSubteamPref" value="second" /> 2nd Pref</label>
+
+	<span class="primary"> <big>&bullet;</big> </span>
+
+	<label onclick="selectSubteam()" class="btn btn-selected"><input type="radio" name="subteam" value="Business" class="chkSubteam" checked/> Business</label>	
+	<label onclick="selectSubteam()" class="btn btn-default"><input type="radio" name="subteam" value="Drive" class="chkSubteam" /> Drive</label>	
+	<label onclick="selectSubteam()" class="btn btn-default"><input type="radio" name="subteam" value="Electrical" class="chkSubteam" /> Electrical</label>	
+	<label onclick="selectSubteam()" class="btn btn-default"><input type="radio" name="subteam" value="Science" class="chkSubteam" /> Science</label>	
+	<label onclick="selectSubteam()" class="btn btn-default"><input type="radio" name="subteam" value="Software" class="chkSubteam" /> Software</label>	
+	<label onclick="selectSubteam()" class="btn btn-default"><input type="radio" name="subteam" value="Tasks" class="chkSubteam" /> Tasks</label>	
+
+</nav>
+
+
+<section id="main-content">
+<!--
+	<article class="page">
+		<header>
+			<h2>NetID</h2>
+			<h3><strong>Year</strong> | Major</h3>
+			<h3><strong>1. First Preference</strong> | 2. Second Preference</h3>
+			<p class="muted">Academic Interests</p>
+		</header>
+
+		<hr>
+
+		<h4><big>1.</big> Why are you interested in joining CMR?</h4>
+		<p>Response</p>
+
+		<h4><big>2.</big> What previous applicable experience do you have? (Robotics, design, teamwork, etc).</h4>
+		<p>Response</p>
+
+		<h4><big>3.</big> If NASA were to begin working on a new Mars rover mission, why would they chose you? Realize the massive scale and interdisciplinary nature of such a project; how would you make your contribution count?</h4>
+		<p>Response</p>
+
+		<h4><big>4.</big> You are stuck on Mars with three other members of your crew. Describe these three members.</h4>
+		<p>Response</p>
+
+		<hr>
+
+		<footer>
+			<h3><span class="tag">Resume</span> Submitted</h3>
+			<h3><span class="tag">GitHub</span> url</h3>
+			<h3><span class="tag">Portfolio</span> url</h3>
+			<br>
+			<h3 class="muted"><span class="tag">NetID:</span> netid</h3>
+		</footer>
+	</article>
+-->
+</section>
+
+
+
+<script>
+	var appData;
+	var acqData;
+	var renderCount = 0;
+	var subteamPref = "first";
+	var subteam = "Business";
+
+	function selectSubteamPref() {
+		var chks = document.getElementsByClassName('chkSubteamPref');
+		for (var i = 0; i < chks.length; i++) {
+			var curChk = chks[i];
+			if (curChk.checked) {
+				curChk.parentElement.classList.remove('btn-default')
+				curChk.parentElement.classList.add('btn-selected');
+				subteamPref = curChk.value;
+			}
+			else {
+				curChk.parentElement.classList.add('btn-default');
+				curChk.parentElement.classList.remove('btn-selected');
+			}
+		}
+		renderData();
+	}
+
+	function selectSubteam() {
+		var chks = document.getElementsByClassName('chkSubteam');
+		for (var i = 0; i < chks.length; i++) {
+			var curChk = chks[i];
+			if (curChk.checked) {
+				curChk.parentElement.classList.remove('btn-default')
+				curChk.parentElement.classList.add('btn-selected');
+				subteam = curChk.value;
+			}
+			else {
+				curChk.parentElement.classList.add('btn-default');
+				curChk.parentElement.classList.remove('btn-selected');
+			}
+		}
+		renderData();
+	}
+
+
+
+	function createPage(entry, num) {
+		var page = d3.select("#main-content").append("article").attr("class", "page");
+
+		var pageHeader = "<span class='counter'>" + num + " of <span class='countTotal'></span></span> \
+			<h2>" + entry["NetID"] + "</h2> \
+			<h3><strong>" + entry["Year"] + "</strong> | " + entry["Major"] + "</h3> \
+			<h3><strong>1. " + entry["What subteam would be your first choice?"] + "</strong> | 2. " + entry["What subteam would be your second choice?"] + "</h3> \
+			<p class='muted'>" + entry["If you're undecided on a major, share with us some of your academic interests and what types of opportunities you are seeking to help you decide:"] + "</p>";
+
+		var pageFooter = "";
+		if (entry["Submitting Resume?"] == "Yes") { 
+			pageFooter += "<h3><span class='tag'>Resume</span> Submitted</h3>"; 
+		}
+		if (entry["GitHub URL"] != "") {
+			pageFooter += "<h3><span class='tag'>GitHub</span> <a href='" + entry["GitHub URL"] + "' target='_blank'>" + entry["GitHub URL"] + "</a></h3>";
+		}
+		if (entry["Portfolio URL"] != "") {
+			pageFooter += "<h3><span class='tag'>Portfolio</span> <a href='" + entry["Portfolio URL"] + "' target='_blank'>" + entry["Portfolio URL"] + "</a></h3>";
+		}
+
+		pageFooter += "<h3><span class='tag'>Acquisition</span> " + acqStatus(entry["NetID"]);
+
+
+		pageFooter += "<h3 class='muted'><span class='tag'>NetID:</span> " + entry["NetID"] + "</h3>";
+
+
+		page.append("header").html(pageHeader);
+
+		page.append("hr");
+
+		page.append("h4").html("<big>1.</big> Why are you interested in joining CMR?");
+		page.append("p").text(entry["Why are you interested in joining CMR?"]);
+
+		page.append("h4").html("<big>2.</big> What previous applicable experience do you have? (Robotics, design, teamwork, etc).");
+		page.append("p").text(entry["What previous applicable experience do you have? (Robotics, design, teamwork, etc)."]);
+
+		page.append("h4").html("<big>3.</big> If NASA were to begin working on a new Mars rover mission, why would they chose you? Realize the massive scale and interdisciplinary nature of such a project; how would you make your contribution count?");
+		page.append("p").text(entry["If NASA were to begin working on a new Mars rover mission, why would they chose you? Realize the massive scale and interdisciplinary nature of such a project; how would you make your contribution count?"]);
+
+		page.append("h4").html("<big>4.</big> You are stuck on Mars with three other members of your crew. Describe these three members.");
+		page.append("p").text(entry["You are stuck on Mars with three other members of your crew.  Describe these three members."]);
+
+		page.append("hr");
+
+		page.append("footer").html(pageFooter);
+
+	}
+
+	function acqStatus(netid) {
+		var wasAcquired = false;
+		var status = "";
+
+		acqData.forEach(function(elem){
+			if (elem["Email"] == (netid + "@cornell.edu")) {
+				if (elem["Info Session"] != "") {
+					status += "Info Session " + elem["Info Session"] + ", ";
+				}
+				if (elem["ProjectFest"] == "Y") {
+					status += "ProjectFest, ";
+				}
+				if (elem["ClubFest"] == "Y") {
+					status += "ClubFest, ";
+				}
+			}
+		});
+
+		return (status != "")? status.substring(0, status.length - 2) : "None";
+	}
+
+
+	function renderData() {
+		d3.select("#subteamTitle").text(subteam);
+		d3.select("#main-content").html("");
+		renderCount = 0;
+
+		appData.forEach(function(appentry) {
+			if (appentry["What subteam would be your " + subteamPref + " choice?"] == subteam) {
+				renderCount++;
+				createPage(appentry, renderCount);
+			}
+		});
+
+		d3.selectAll(".countTotal").text(renderCount);
+	}
+
+
+
+	d3.tsv("CMR-AppData.tsv", function(error1, applicationData) {
+		d3.tsv("CMR-AcqData.tsv", function(error2, acquisitionData) {
+			appData = applicationData;
+			acqData = acquisitionData;
+
+			renderData();
+
+		});
+	});
+</script>
+
+
+
+<!-- End Document
+================================================== -->
+</body>
+</html>
